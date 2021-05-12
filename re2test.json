@@ -1,0 +1,11 @@
+{
+  "requirements": [
+    {
+      "id": "1",
+      "text": "The system may respond within 5 seconds."
+    }
+  ],
+  "config": {
+    "algorithms": ["Lexical", "RegularExpressions", "POSRegularExpressions", "CompoundNouns", "Nominalization"]
+  }
+}

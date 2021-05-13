@@ -9,7 +9,7 @@ import re
 from nltk.corpus import wordnet as wn
 from nltk.tokenize import sent_tokenize
 import time
-import en_core_web_md
+import en_core_web_sm
 
 from pprint import pprint
 

@@ -47,7 +47,8 @@ def get_reqs(json_data):
 def getLexiconJSONCombined(allfileslist):
     filesallDict = {}
     for f in allfileslist:
-        with open(f, encoding='mbcs') as json_file:
+        # in windows encoding = 'mbcs'
+        with open(f, encoding='utf-8') as json_file:
             data = json.load(json_file)
             filesallDict.update(data)
     return  filesallDict
@@ -65,7 +66,7 @@ def getReSmelltypeMappingDict():
     return theMappingDict
 
 reSmellDict = getReSmelltypeMappingDict()
-df = pd.read_csv('NewFeature.csv')
+df = pd.read_csv('NewFeature_plus.csv')
 #df = df[df['description'].isna()]
 keyList = df['key'].values.tolist()
 
@@ -122,18 +123,20 @@ def fromKeyGet2AddFeatureDict(thekey):
     resultDict = fromKeyGetReSmellResultSpecifiedDict(thekey)
     resultkeys = list(resultDict.keys())
     theAddFeatureDict['sent_smell'] = len([x for x in resultkeys if resultDict[x]])
+    print(thekey)
     return theAddFeatureDict
 
 def getAddedSmellCSV(thedf, thenewfilename):
     resultdf = thedf.copy()
     thekeylist = resultdf['key'].values.tolist()
     theresultlistofdicts = [fromKeyGet2AddFeatureDict(x) for x in thekeylist]
+    print("Get data!")
     the2Addkeys = list(theresultlistofdicts[0].keys())
     for key in the2Addkeys:
         resultdf[key] = np.array([x[key] for x in theresultlistofdicts])
     resultdf.to_csv(thenewfilename, index=False)
 
-getAddedSmellCSV(df, "NewFeature_plus.csv")
+#getAddedSmellCSV(df, 'NewFeature_plus.csv')
 
 #print(len(fromKeyGetSummaryAndDescriptionSentenceList(keyList[2])))
 #print(fromKeyGetSmellCount(keyList[2]))
@@ -147,6 +150,7 @@ getAddedSmellCSV(df, "NewFeature_plus.csv")
 #    else:
 #        print(item)
 
+pprint(reSmellDict)
 
 #for i in range(len(summaryList)):
 #    defaultJsonDict["requirements"].append({"id": str(i+1), "text": summaryList[i]})

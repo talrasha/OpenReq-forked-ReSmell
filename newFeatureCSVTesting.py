@@ -18,6 +18,7 @@ from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from bs4 import BeautifulSoup
 import ssl
 from urllib.request import urlopen
+from app.requirement_improver import RequirementChecker
 
 desired_width=320
 pd.set_option('display.width', desired_width)

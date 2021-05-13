@@ -36,7 +36,9 @@ reSmellDict = {
     "Subjective Language": "ReS_4",
     "Nominalization": "ReS_5",
     "Comparatives and Superlatives": "ReS_6",
-    "Coordination": "ReS_7"
+    "Negative Statement": "ReS_7",
+    "Vague Pronoun": "ReS_8",
+    "Coordination": "ReS_8"
 }
 
 def getSentenceListfromText(textstring):

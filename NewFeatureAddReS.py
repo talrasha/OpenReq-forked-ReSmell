@@ -74,18 +74,20 @@ def getReSmelltypeMappingDict():
     thelist = sorted(thelist)
     theMappingDict = {}
     for i in range(len(thelist)):
-        theMappingDict[thelist[i]] = "ReS_"+str(i+1)
+        theMappingDict[thelist[i]] = "res_"+str(i+1)
     return theMappingDict
 
 reSmellDict = getReSmelltypeMappingDict()
+df = pd.read_csv('NewFeature.csv')
+keyList = df['key'].values.tolist()
 
 #with open('testingConfig.json') as json_file:
 #    thereqjson = json.load(json_file)
 #theRE = RequirementChecker(get_reqs(defaultJsonDict))
 #pprint(theRE.check_quality())
 
+#print(df.loc[df['key']==keyList[0], 'description'].values[0])
 
-#df = pd.read_csv('NewFeature.csv')
 #description_list = df.loc[:,'description'].values.tolist()
 #df_nnan=df[df['summary'].notna()]
 #print(df_nnan.head())

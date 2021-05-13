@@ -66,7 +66,8 @@ def getReSmelltypeMappingDict():
     return theMappingDict
 
 reSmellDict = getReSmelltypeMappingDict()
-df = pd.read_csv('NewFeature_plus.csv')
+df_old = pd.read_csv('NewFeature_plus.csv')
+df = pd.read_csv('NewFeature_plus2.csv')
 #df = df[df['description'].isna()]
 keyList = df['key'].values.tolist()
 
@@ -135,3 +136,6 @@ def getAddedSmellCSV(thedf, thenewfilename):
     for key in the2Addkeys:
         resultdf[key] = np.array([x[key] for x in theresultlistofdicts])
     resultdf.to_csv(thenewfilename, index=False)
+
+print(df_old.head())
+print(df.head())

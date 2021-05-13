@@ -79,14 +79,32 @@ def getReSmelltypeMappingDict():
 
 reSmellDict = getReSmelltypeMappingDict()
 df = pd.read_csv('NewFeature.csv')
+#df = df[df['description'].isna()]
 keyList = df['key'].values.tolist()
+#print(df.loc[df['key']==keyList[0], 'description'].values[0])
+
+def fromKeyGetSummaryAndDescriptionSentenceList(thekey):
+    theSummaryText = df.loc[df['key']==thekey, 'summary'].values[0]
+    if str(df.loc[df['key']==thekey, 'description'].values[0]) == 'nan':
+        theDescriptionText = ""
+    else:
+        theDescriptionText = df.loc[df['key'] == thekey, 'description'].values[0]
+        theDescriptionText = ' '.join([x for x in theDescriptionText.split('\n')])
+    STsentences = nltk.tokenize.sent_tokenize(theSummaryText)
+    DTsentences = nltk.tokenize.sent_tokenize(theDescriptionText)
+    sentences = STsentences + DTsentences
+    print(len(sentences))
+    for item in sentences:
+        print(item.strip('\n'))
+
+fromKeyGetSummaryAndDescriptionSentenceList(keyList[0])
 
 #with open('testingConfig.json') as json_file:
 #    thereqjson = json.load(json_file)
 #theRE = RequirementChecker(get_reqs(defaultJsonDict))
 #pprint(theRE.check_quality())
 
-#print(df.loc[df['key']==keyList[0], 'description'].values[0])
+
 
 #description_list = df.loc[:,'description'].values.tolist()
 #df_nnan=df[df['summary'].notna()]

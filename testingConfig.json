@@ -1,0 +1,19 @@
+{
+  "requirements": [
+    {
+      "id": "1",
+      "text": "The system may respond within 5 seconds."
+    },
+    {
+      "id": "2",
+      "text": "As far as possible , inputs are checked for plausibility."
+    },
+    {
+      "id": "3",
+      "text": "The system must provide the signal in the highest resolution that is desired by the signal customer."
+    }
+  ],
+  "config": {
+    "algorithms": ["Lexical", "RegularExpressions", "POSRegularExpressions", "CompoundNouns", "Nominalization"]
+  }
+}

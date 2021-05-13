@@ -9,6 +9,7 @@ import re
 from nltk.corpus import wordnet as wn
 from nltk.tokenize import sent_tokenize
 import time
+import en_core_web_md
 
 from pprint import pprint
 
@@ -55,7 +56,8 @@ class RequirementChecker:
     def __init__(self, reqs, config=None, is_logging=False):
         self.reqs = reqs
         self.config = config if config else {}
-        self.nlp = spacy.load('en')
+        #self.nlp = en_core_web_md.load()
+        self.nlp = spacy.load('en_core_web_sm')
         self.is_logging = is_logging
         self.amb_algs = {
             'Lexical': {

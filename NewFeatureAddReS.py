@@ -22,20 +22,7 @@ lexicons_all_files = glob("./app/lexicons/lex_*.json")
 lexicons_all_files = ['/'.join(x.split('\\')) for x in lexicons_all_files]
 
 defaultJsonDict = {
-  "requirements": [
-    {
-      "id": "1",
-      "text": "The system may respond within 5 seconds."
-    },
-    {
-      "id": "2",
-      "text": "As far as possible , inputs are checked for plausibility."
-    },
-    {
-      "id": "3",
-      "text": "The system must provide the signal in the highest resolution that is desired by the signal customer."
-    }
-  ],
+  "requirements": [],
   "config": {
     "algorithms": ["Lexical", "RegularExpressions", "POSRegularExpressions", "CompoundNouns", "Nominalization"]
   }
@@ -89,9 +76,11 @@ def fromKeyGetSummaryAndDescriptionSentenceList(thekey):
     else:
         theDescriptionText = df.loc[df['key'] == thekey, 'description'].values[0]
         theDescriptionText = ' '.join([x for x in theDescriptionText.split('\n')])
-    STsentences = nltk.tokenize.sent_tokenize(theSummaryText)
-    DTsentences = nltk.tokenize.sent_tokenize(theDescriptionText)
-    sentences = STsentences + DTsentences
+    #STsentences = nltk.tokenize.sent_tokenize(theSummaryText)
+    #DTsentences = nltk.tokenize.sent_tokenize(theDescriptionText)
+    #sentences = STsentences + DTsentences
+    sentences = nltk.tokenize.sent_tokenize(theDescriptionText)
+    sentences.append(theSummaryText)
     sentences = [x.strip('\n') for x in sentences]
     return sentences
 
@@ -120,9 +109,40 @@ def fromKeyGetSmellCount(thekey):
                     theSmellCountDict[reSmellDict[smell['language_construct']]] = 1
         else:
             continue
+    for res in list(reSmellDict.values()):
+        if res in theSmellCountDict:
+            continue
+        else:
+            theSmellCountDict[res] = 0
     return theSmellCountDict
 
-print(fromKeyGetSmellCount(keyList[0]))
+def fromKeyGet2AddFeatureDict(thekey):
+    theAddFeatureDict = fromKeyGetSmellCount(thekey)
+    theAddFeatureDict['sent_count'] = len(fromKeyGetSummaryAndDescriptionSentenceList(thekey))
+    resultDict = fromKeyGetReSmellResultSpecifiedDict(thekey)
+    resultkeys = list(resultDict.keys())
+    theAddFeatureDict['sent_smell'] = len([x for x in resultkeys if resultDict[x]])
+    return theAddFeatureDict
+
+pprint(fromKeyGet2AddFeatureDict(keyList[2]))
+
+#print(len(fromKeyGetSummaryAndDescriptionSentenceList(keyList[2])))
+#print(fromKeyGetSmellCount(keyList[2]))
+
+# Check Long Multi-sentence Summaries
+#summaryList = df['summary'].values.tolist()
+#for item in summaryList:
+#    tokenlist = sent_tokenize(item)
+#    if len(tokenlist) == 1:
+#        continue
+#    else:
+#        print(item)
+
+
+#for i in range(len(summaryList)):
+#    defaultJsonDict["requirements"].append({"id": str(i+1), "text": summaryList[i]})
+#theRE = RequirementChecker(get_reqs(defaultJsonDict))
+#pprint(theRE.check_quality())
 
 #with open('testingConfig.json') as json_file:
 #    thereqjson = json.load(json_file)

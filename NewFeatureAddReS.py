@@ -81,7 +81,6 @@ reSmellDict = getReSmelltypeMappingDict()
 df = pd.read_csv('NewFeature.csv')
 #df = df[df['description'].isna()]
 keyList = df['key'].values.tolist()
-#print(df.loc[df['key']==keyList[0], 'description'].values[0])
 
 def fromKeyGetSummaryAndDescriptionSentenceList(thekey):
     theSummaryText = df.loc[df['key']==thekey, 'summary'].values[0]
@@ -93,11 +92,37 @@ def fromKeyGetSummaryAndDescriptionSentenceList(thekey):
     STsentences = nltk.tokenize.sent_tokenize(theSummaryText)
     DTsentences = nltk.tokenize.sent_tokenize(theDescriptionText)
     sentences = STsentences + DTsentences
-    print(len(sentences))
-    for item in sentences:
-        print(item.strip('\n'))
+    sentences = [x.strip('\n') for x in sentences]
+    return sentences
 
-fromKeyGetSummaryAndDescriptionSentenceList(keyList[0])
+def fromKeyGetReSmellResultSpecifiedDict(thekey):
+    sentenceList = fromKeyGetSummaryAndDescriptionSentenceList(thekey)
+    defaultJsonDict = {
+        "requirements": [],
+        "config": {
+            "algorithms": ["Lexical", "RegularExpressions", "POSRegularExpressions", "CompoundNouns", "Nominalization"]
+        }
+    }
+    for i in range(len(sentenceList)):
+        defaultJsonDict["requirements"].append({"id": thekey+"_"+str(i+1), "text": sentenceList[i]})
+    theRE = RequirementChecker(get_reqs(defaultJsonDict))
+    return theRE.check_quality()
+
+def fromKeyGetSmellCount(thekey):
+    resultDict = fromKeyGetReSmellResultSpecifiedDict(thekey)
+    theSmellCountDict = {}
+    for item in list(resultDict.keys()):
+        if resultDict[item]:
+            for smell in resultDict[item]:
+                if reSmellDict[smell['language_construct']] in theSmellCountDict:
+                    theSmellCountDict[reSmellDict[smell['language_construct']]] += 1
+                else:
+                    theSmellCountDict[reSmellDict[smell['language_construct']]] = 1
+        else:
+            continue
+    return theSmellCountDict
+
+print(fromKeyGetSmellCount(keyList[0]))
 
 #with open('testingConfig.json') as json_file:
 #    thereqjson = json.load(json_file)

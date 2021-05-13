@@ -124,7 +124,16 @@ def fromKeyGet2AddFeatureDict(thekey):
     theAddFeatureDict['sent_smell'] = len([x for x in resultkeys if resultDict[x]])
     return theAddFeatureDict
 
-pprint(fromKeyGet2AddFeatureDict(keyList[2]))
+def getAddedSmellCSV(thedf, thenewfilename):
+    resultdf = thedf.copy()
+    thekeylist = resultdf['key'].values.tolist()
+    theresultlistofdicts = [fromKeyGet2AddFeatureDict(x) for x in thekeylist]
+    the2Addkeys = list(theresultlistofdicts[0].keys())
+    for key in the2Addkeys:
+        resultdf[key] = np.array([x[key] for x in theresultlistofdicts])
+    resultdf.to_csv(thenewfilename, index=False)
+
+getAddedSmellCSV(df, "NewFeature_plus.csv")
 
 #print(len(fromKeyGetSummaryAndDescriptionSentenceList(keyList[2])))
 #print(fromKeyGetSmellCount(keyList[2]))

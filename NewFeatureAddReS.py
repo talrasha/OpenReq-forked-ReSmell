@@ -11,7 +11,7 @@ import codecs
 import pandas as pd
 import numpy as np
 from glob import glob
-import os
+import os, csv
 
 desired_width=320
 pd.set_option('display.width', desired_width)
@@ -47,8 +47,7 @@ def get_reqs(json_data):
 def getLexiconJSONCombined(allfileslist):
     filesallDict = {}
     for f in allfileslist:
-        # in windows encoding = 'mbcs'
-        with open(f, encoding='utf-8') as json_file:
+        with open(f, encoding='mbcs') as json_file:
             data = json.load(json_file)
             filesallDict.update(data)
     return  filesallDict
@@ -66,7 +65,6 @@ def getReSmelltypeMappingDict():
     return theMappingDict
 
 reSmellDict = getReSmelltypeMappingDict()
-df_old = pd.read_csv('NewFeature_plus.csv')
 df = pd.read_csv('NewFeature_plus2.csv')
 #df = df[df['description'].isna()]
 keyList = df['key'].values.tolist()
@@ -124,18 +122,54 @@ def fromKeyGet2AddFeatureDict(thekey):
     resultDict = fromKeyGetReSmellResultSpecifiedDict(thekey)
     resultkeys = list(resultDict.keys())
     theAddFeatureDict['sent_smell'] = len([x for x in resultkeys if resultDict[x]])
-    print(thekey)
     return theAddFeatureDict
 
 def getAddedSmellCSV(thedf, thenewfilename):
     resultdf = thedf.copy()
     thekeylist = resultdf['key'].values.tolist()
     theresultlistofdicts = [fromKeyGet2AddFeatureDict(x) for x in thekeylist]
-    print("Get data!")
     the2Addkeys = list(theresultlistofdicts[0].keys())
     for key in the2Addkeys:
         resultdf[key] = np.array([x[key] for x in theresultlistofdicts])
     resultdf.to_csv(thenewfilename, index=False)
 
-print(df_old.head())
-print(df.head())
+def fromKeyGetReSmellResultSpecifiedDictforSummary(thekey):
+    theSummaryText = df.loc[df['key']==thekey, 'summary'].values[0]
+
+    defaultJsonDict = {
+        "requirements": [],
+        "config": {
+            "algorithms": ["Lexical", "RegularExpressions", "POSRegularExpressions", "CompoundNouns", "Nominalization"]
+        }
+    }
+
+    defaultJsonDict["requirements"].append({"id": thekey, "text": theSummaryText})
+    theRE = RequirementChecker(get_reqs(defaultJsonDict))
+    resultDict =  theRE.check_quality()
+    theSmellCountDict = {}
+    sorteddictkeys = sorted(list(resultDict.keys()))
+    for item in sorteddictkeys:
+        if resultDict[item]:
+            for smell in resultDict[item]:
+                if reSmellDict[smell['language_construct']] in theSmellCountDict:
+                    theSmellCountDict[reSmellDict[smell['language_construct']]] += 1
+                else:
+                    theSmellCountDict[reSmellDict[smell['language_construct']]] = 1
+        else:
+            continue
+    for res in list(reSmellDict.values()):
+        if res in theSmellCountDict:
+            continue
+        else:
+            theSmellCountDict[res] = 0
+
+    return theSmellCountDict
+
+def checkSummaryReSmell(thekey):
+    theSmellCountDict = fromKeyGetReSmellResultSpecifiedDictforSummary(thekey)
+    dictkeysortedlist = sorted(theSmellCountDict)
+    if sum([theSmellCountDict[x] for x in dictkeysortedlist]):
+        return 1
+    else:
+        return 0
+

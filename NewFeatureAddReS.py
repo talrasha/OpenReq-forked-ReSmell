@@ -173,3 +173,52 @@ def checkSummaryReSmell(thekey):
     else:
         return 0
 
+def addRes81column2NewCSV(thedf):
+    thekeyList = thedf['key'].values.tolist()
+    column81list = []
+    for key in thekeyList:
+        count = 0
+        thedict = fromKeyGetReSmellResultSpecifiedDict(key)
+        thedictkeys = list(thedict.keys())
+        for sentid in thedictkeys:
+            for smell in thedict[sentid]:
+                if smell['title'] == 'Passive Voice Ambiguity':
+                    count+=1
+                else:
+                    continue
+        column81list.append(count)
+        print(key)
+    thedf['res_8.1'] = np.array(column81list)
+    thedf.to_csv('NewFeature_plus3.csv', index=False)
+
+def getIndexCSV(thedf):
+    theFeatures = ['key', 'sentence_id', 'smell_id', 'index_start', 'index_end', 'language_construct', 'smell_title', 'smell_text']
+    with open('indexDetails.csv', 'a') as csvfile:
+        writer = csv.writer(csvfile, delimiter=',')
+        writer.writerow(theFeatures)
+    thekeyList = thedf['key'].values.tolist()
+    for key in thekeyList:
+        print(key)
+        thedict = fromKeyGetReSmellResultSpecifiedDict(key)
+        thedictkeys = list(thedict.keys())
+        for sentid in thedictkeys:
+            for smell in thedict[sentid]:
+                theinputline = []
+                theinputline.append(key)
+                theinputline.append(int(sentid.split('_')[-1]))
+                if smell['title'] != 'Passive Voice Ambiguity':
+                    theinputline.append(reSmellDict[smell['language_construct']])
+                else:
+                    theinputline.append('res_8.1')
+                theinputline.append(smell['index_start'])
+                theinputline.append(smell['index_end'])
+                theinputline.append(smell['language_construct'])
+                theinputline.append(smell['title'])
+                theinputline.append(smell['text'])
+                with open('indexDetails.csv', 'a', encoding='utf-8') as csvfile:
+                    writer = csv.writer(csvfile, delimiter=',')
+                    writer.writerow(theinputline)
+    cleandf = pd.read_csv('indexDetails.csv')
+    cleandf.to_csv('indexDetails2.csv', index=False)
+
+getIndexCSV(df)

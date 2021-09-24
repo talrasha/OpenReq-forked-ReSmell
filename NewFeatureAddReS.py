@@ -65,9 +65,13 @@ def getReSmelltypeMappingDict():
     return theMappingDict
 
 reSmellDict = getReSmelltypeMappingDict()
-df = pd.read_csv('NewFeature_plus2.csv')
+#df = pd.read_csv('NewFeature_plus2.csv')
 #df = df[df['description'].isna()]
+#keyList = df['key'].values.tolist()
+
+df = pd.read_csv('jira_issues.csv', lineterminator='\n', error_bad_lines=False)
 keyList = df['key'].values.tolist()
+
 
 def fromKeyGetSummaryAndDescriptionSentenceList(thekey):
     theSummaryText = df.loc[df['key']==thekey, 'summary'].values[0]
@@ -86,6 +90,7 @@ def fromKeyGetSummaryAndDescriptionSentenceList(thekey):
 
 def fromKeyGetReSmellResultSpecifiedDict(thekey):
     sentenceList = fromKeyGetSummaryAndDescriptionSentenceList(thekey)
+
     defaultJsonDict = {
         "requirements": [],
         "config": {
@@ -95,6 +100,8 @@ def fromKeyGetReSmellResultSpecifiedDict(thekey):
     for i in range(len(sentenceList)):
         defaultJsonDict["requirements"].append({"id": thekey+"_"+str(i+1), "text": sentenceList[i]})
     theRE = RequirementChecker(get_reqs(defaultJsonDict))
+    print("1-here")
+    print(theRE.check_quality())
     return theRE.check_quality()
 
 def fromKeyGetSmellCount(thekey):
@@ -221,4 +228,46 @@ def getIndexCSV(thedf):
     cleandf = pd.read_csv('indexDetails.csv')
     cleandf.to_csv('indexDetails2.csv', index=False)
 
-getIndexCSV(df)
+def getAddedSmellCSV2(thedf, thenewfilename):
+    thefeatures = [f'res_{x+1}' for x in range(9)]
+    thefeatures.extend(['sent_count', 'sent_smell', 'res_8.1'])
+    resultdf = thedf.copy()
+    thekeylist = resultdf['key'].values.tolist()
+    newfeatureList = list(resultdf.columns)
+    newfeatureList.extend(thefeatures)
+    #with open(thenewfilename, 'a') as csvfile:
+    #    writer = csv.writer(csvfile, delimiter=',')
+    #    writer.writerow(newfeatureList)
+    for i in range(322,len(thekeylist)):
+        orignalvalues = resultdf.loc[resultdf['key']==thekeylist[i],:].values.tolist()[0]
+        thedict = fromKeyGet2AddFeatureDict(thekeylist[i])
+        print("gets here!")
+        for feature in thefeatures[:-1]:
+            orignalvalues.append(thedict[feature])
+        specificDict = fromKeyGetReSmellResultSpecifiedDict(thekeylist[i])
+        print("gets hereafdafdsafdsa")
+        count = 0
+        thedictkeys = list(specificDict.keys())
+        for sentid in thedictkeys:
+            for smell in specificDict[sentid]:
+                print(smell)
+                if smell['title'] == 'Passive Voice Ambiguity':
+                    count += 1
+                    print(count)
+                else:
+                    continue
+        orignalvalues.append(count)
+        with open(thenewfilename, 'a', encoding='utf-8') as csvfile:
+            writer = csv.writer(csvfile, delimiter=',')
+            writer.writerow(orignalvalues)
+        print(str(i+1)+f"/{len(thekeylist)}")
+        break
+    dfnew = pd.read_csv(thenewfilename)
+    dfnew.drop_duplicates(inplace=True)
+    dfnew.to_csv(thenewfilename, index=False)
+
+getAddedSmellCSV2(df, 'jira_issues_plus.csv')
+#print(fromKeyGetReSmellResultSpecifiedDict('EXEC-108'))
+
+#dffdaf = pd.read_csv('jira_issues_plus.csv')
+#print(dffdaf.tail())
